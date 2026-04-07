@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useRef } from "react";
+import { Heart, Bookmark } from "lucide-react";
 import { BlurFade } from "@/components/magicui/blur-fade";
 import { Spotlight } from "@/components/magicui/spotlight";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -91,6 +92,16 @@ function PostCard({ post, lang, index }: { post: PostPreview; lang: Locale; inde
                 <p className="line-clamp-3 text-sm leading-relaxed text-text-muted">
                   {post.excerpt ?? (lang === "tr" ? "Bu yazıyı okumak için tıkla." : "Click to read this post.")}
                 </p>
+                <div className="mt-4 flex items-center gap-3 text-xs text-text-subtle">
+                  <span className="inline-flex items-center gap-1">
+                    <Heart size={13} />
+                    {post.likes_count}
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <Bookmark size={13} />
+                    {post.bookmarks_count}
+                  </span>
+                </div>
               </CardContent>
             </Card>
           </Link>

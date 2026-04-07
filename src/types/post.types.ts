@@ -21,7 +21,32 @@ export type Post = {
   updated_at: string | null;
 };
 
+export type Like = {
+  user_id: string;
+  post_id: string;
+  created_at: string | null;
+};
+
+export type Bookmark = {
+  user_id: string;
+  post_id: string;
+  created_at: string | null;
+};
+
+export type PostEngagement = {
+  likes_count: number;
+  bookmarks_count: number;
+};
+
+export type PostEngagementState = {
+  user_has_liked: boolean;
+  user_has_bookmarked: boolean;
+};
+
+export type PostWithEngagement = Post & PostEngagement & PostEngagementState;
+
 export type PostPreview = Pick<
   Post,
   "id" | "title" | "slug" | "excerpt" | "cover_image" | "published_at" | "reading_time"
->;
+> &
+  PostEngagement;
