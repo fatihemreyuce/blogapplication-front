@@ -1,0 +1,41 @@
+{
+  "nav": {
+    "home": "Ana Sayfa",
+    "blog": "Blog",
+    "about": "Hakkında",
+    "search": "Ara",
+    "categories": "Kategoriler",
+    "tags": "Etiketler",
+    "series": "Seriler",
+    "toggle_theme": "Tema değiştir",
+    "toggle_lang": "Switch to English"
+  },
+  "home": {
+    "hero_title": "Hoş Geldiniz",
+    "hero_subtitle": "Teknoloji, tasarım ve daha fazlası üzerine yazılar.",
+    "latest_posts": "Son Yazılar",
+    "view_all": "Tümünü Gör",
+    "read_more": "Devamını Oku"
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Tüm yazılar",
+    "no_posts": "Henüz yazı yok.",
+    "search_placeholder": "Yazı ara...",
+    "results_found": "sonuç bulundu"
+  },
+  "post": {
+    "back": "Geri Dön",
+    "share": "Paylaş",
+    "min_read": "dk okuma",
+    "table_of_contents": "İçindekiler",
+    "related_posts": "Benzer Yazılar",
+    "tags": "Etiketler"
+  },
+  "common": {
+    "loading": "Yükleniyor...",
+    "error": "Bir hata oluştu.",
+    "not_found": "Sayfa bulunamadı.",
+    "go_home": "Ana Sayfaya Dön"
+  }
+}

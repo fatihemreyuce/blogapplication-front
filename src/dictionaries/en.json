@@ -1,0 +1,41 @@
+{
+  "nav": {
+    "home": "Home",
+    "blog": "Blog",
+    "about": "About",
+    "search": "Search",
+    "categories": "Categories",
+    "tags": "Tags",
+    "series": "Series",
+    "toggle_theme": "Toggle theme",
+    "toggle_lang": "Türkçeye Geç"
+  },
+  "home": {
+    "hero_title": "Welcome",
+    "hero_subtitle": "Articles on technology, design, and more.",
+    "latest_posts": "Latest Posts",
+    "view_all": "View All",
+    "read_more": "Read More"
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "All posts",
+    "no_posts": "No posts yet.",
+    "search_placeholder": "Search posts...",
+    "results_found": "results found"
+  },
+  "post": {
+    "back": "Go Back",
+    "share": "Share",
+    "min_read": "min read",
+    "table_of_contents": "Table of Contents",
+    "related_posts": "Related Posts",
+    "tags": "Tags"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong.",
+    "not_found": "Page not found.",
+    "go_home": "Go Home"
+  }
+}
