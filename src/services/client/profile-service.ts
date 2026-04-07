@@ -8,6 +8,14 @@ type AuthResult = {
   message: string | null;
 };
 
+function mapAuthError(message: string | null): string | null {
+  if (!message) return null;
+  if (message.toLowerCase().includes("email not confirmed")) {
+    return "EMAIL_NOT_CONFIRMED";
+  }
+  return message;
+}
+
 export async function getCurrentUserLite(): Promise<AuthUserLite | null> {
   const supabase = getSupabaseClient();
   const {
@@ -23,6 +31,16 @@ export async function signInWithPassword(
 ): Promise<AuthResult> {
   const supabase = getSupabaseClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) return { ok: false, message: mapAuthError(error.message) };
+  return { ok: true, message: null };
+}
+
+export async function resendSignupConfirmationEmail(email: string): Promise<AuthResult> {
+  const supabase = getSupabaseClient();
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email,
+  });
   if (error) return { ok: false, message: error.message };
   return { ok: true, message: null };
 }

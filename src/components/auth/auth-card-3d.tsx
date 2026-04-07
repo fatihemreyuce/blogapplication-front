@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useState } from "react";
 import { Sparkles, ShieldCheck, Zap, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { BlurFade } from "@/components/magicui/blur-fade";
@@ -32,6 +31,10 @@ const copy = {
     switchToSignup: "Hesabın yok mu? Kayıt ol",
     secure: "Güvenli kimlik doğrulama",
     fast: "Hızlı erişim ve modern deneyim",
+    emailNotConfirmed:
+      "E-posta doğrulanmamış. Mail kutundan doğrulama linkine tıkla veya yeniden gönder.",
+    resendConfirm: "Doğrulama mailini tekrar gönder",
+    resendSent: "Doğrulama maili tekrar gönderildi.",
   },
   en: {
     loginTitle: "Welcome back",
@@ -48,13 +51,17 @@ const copy = {
     switchToSignup: "No account yet? Sign up",
     secure: "Secure authentication flow",
     fast: "Fast access and modern experience",
+    emailNotConfirmed:
+      "Your email is not confirmed. Check your inbox or resend the confirmation email.",
+    resendConfirm: "Resend confirmation email",
+    resendSent: "Confirmation email sent again.",
   },
 } as const;
 
 export function AuthCard3D({ mode, lang }: Props) {
   const t = copy[lang];
   const router = useRouter();
-  const { login, signup, error, setError } = useProfile();
+  const { login, signup, resendConfirmation, error, setError } = useProfile();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -62,22 +69,14 @@ export function AuthCard3D({ mode, lang }: Props) {
   const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const rotateX = useSpring(useTransform(mouseY, [-160, 160], [7, -7]), {
-    stiffness: 220,
-    damping: 26,
-  });
-  const rotateY = useSpring(useTransform(mouseX, [-160, 160], [-7, 7]), {
-    stiffness: 220,
-    damping: 26,
-  });
+  const [resending, setResending] = useState(false);
+  const [info, setInfo] = useState<string | null>(null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setInfo(null);
 
     if (mode === "login") {
       const result = await login(email, password);
@@ -95,8 +94,21 @@ export function AuthCard3D({ mode, lang }: Props) {
     setLoading(false);
   }
 
+  async function onResendConfirmation() {
+    if (!email.trim()) return;
+    setResending(true);
+    setInfo(null);
+    const result = await resendConfirmation(email.trim());
+    if (result.ok) {
+      setInfo(t.resendSent);
+    }
+    setResending(false);
+  }
+
+  const isEmailNotConfirmed = error === "EMAIL_NOT_CONFIRMED";
+
   return (
-    <Spotlight className="relative rounded-3xl">
+    <Spotlight className="relative">
       <GridPattern
         squares={[
           [0, 1],
@@ -104,55 +116,48 @@ export function AuthCard3D({ mode, lang }: Props) {
           [4, 3],
           [6, 1],
         ]}
-        className="opacity-40"
+        className="opacity-30"
       />
-      <motion.div
-        style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: 900 }}
-        onMouseMove={(e) => {
-          const rect = e.currentTarget.getBoundingClientRect();
-          mouseX.set(e.clientX - (rect.left + rect.width / 2));
-          mouseY.set(e.clientY - (rect.top + rect.height / 2));
-        }}
-        onMouseLeave={() => {
-          mouseX.set(0);
-          mouseY.set(0);
-        }}
-        className="relative overflow-hidden rounded-3xl border border-border/60 bg-surface/80 p-8 backdrop-blur-xl"
-      >
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
-        <div className="pointer-events-none absolute -top-12 -right-10 h-32 w-32 rounded-full bg-violet-500/15 blur-2xl" />
-        <div className="pointer-events-none absolute -bottom-12 -left-10 h-32 w-32 rounded-full bg-blue-500/15 blur-2xl" />
+      <div className="relative grid gap-10 px-2 py-4 md:grid-cols-[minmax(0,1fr)_minmax(360px,460px)] md:items-center md:gap-14 md:px-0 lg:gap-20">
+        <div className="pointer-events-none absolute -top-14 left-10 h-36 w-36 rounded-full bg-violet-500/15 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-14 right-10 h-36 w-36 rounded-full bg-blue-500/15 blur-3xl" />
+
         <div className="space-y-6">
-          <BlurFade delay={0.05}>
-            <div className="space-y-2">
+          <BlurFade delay={0.08}>
+            <div className="space-y-3">
               <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary">
                 <Sparkles size={12} />
                 {mode === "login" ? "Login" : "Signup"}
               </div>
-              <h1 className="text-3xl font-black tracking-tight">
+              <h1 className="text-4xl font-black tracking-tight md:text-5xl">
                 {mode === "login" ? t.loginTitle : t.signupTitle}
               </h1>
-              <p className="text-sm text-text-muted">
+              <p className="max-w-xl text-sm text-text-muted md:text-base">
                 {mode === "login" ? t.loginSub : t.signupSub}
               </p>
             </div>
           </BlurFade>
 
-          <BlurFade delay={0.08}>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <div className="flex items-center gap-2 rounded-xl border border-border/60 bg-background/40 px-3 py-2 text-xs text-text-muted">
+          <BlurFade delay={0.12}>
+            <div className="grid max-w-xl grid-cols-1 gap-2 sm:grid-cols-2">
+              <div className="flex items-center gap-2 rounded-xl border border-border/50 bg-background/35 px-3 py-2 text-xs text-text-muted backdrop-blur-sm">
                 <ShieldCheck size={14} className="text-emerald-400" />
                 {t.secure}
               </div>
-              <div className="flex items-center gap-2 rounded-xl border border-border/60 bg-background/40 px-3 py-2 text-xs text-text-muted">
+              <div className="flex items-center gap-2 rounded-xl border border-border/50 bg-background/35 px-3 py-2 text-xs text-text-muted backdrop-blur-sm">
                 <Zap size={14} className="text-blue-400" />
                 {t.fast}
               </div>
             </div>
           </BlurFade>
+        </div>
 
-          <BlurFade delay={0.1}>
-            <form className="space-y-3" onSubmit={onSubmit}>
+        <BlurFade delay={0.16}>
+          <div className="space-y-3 md:justify-self-end md:w-full md:max-w-[460px]">
+            <form
+              className="space-y-3 rounded-2xl border border-border/55 bg-surface/55 p-5 backdrop-blur-lg md:p-6"
+              onSubmit={onSubmit}
+            >
               {mode === "signup" ? (
                 <>
                   <input
@@ -200,7 +205,24 @@ export function AuthCard3D({ mode, lang }: Props) {
                 </button>
               </div>
 
-              {error ? <p className="text-xs text-rose-400">{error}</p> : null}
+              {error ? (
+                <div className="space-y-1">
+                  <p className="text-xs text-rose-400">
+                    {isEmailNotConfirmed ? t.emailNotConfirmed : error}
+                  </p>
+                  {mode === "login" && isEmailNotConfirmed ? (
+                    <button
+                      type="button"
+                      onClick={onResendConfirmation}
+                      disabled={resending || !email.trim()}
+                      className="text-xs font-medium text-primary underline-offset-2 hover:underline disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {resending ? "..." : t.resendConfirm}
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
+              {info ? <p className="text-xs text-emerald-400">{info}</p> : null}
 
               <ShimmerButton type="submit" disabled={loading} className="w-full text-sm font-semibold">
                 <span className="inline-flex items-center gap-2">
@@ -209,10 +231,7 @@ export function AuthCard3D({ mode, lang }: Props) {
                 </span>
               </ShimmerButton>
             </form>
-          </BlurFade>
-
-          <BlurFade delay={0.15}>
-            <div className="text-xs text-text-subtle">
+            <div className="px-1 text-center text-xs text-text-subtle md:text-left">
               {mode === "login" ? (
                 <Link href={`/${lang}/signup`} className="hover:text-primary">
                   {t.switchToSignup}
@@ -223,9 +242,9 @@ export function AuthCard3D({ mode, lang }: Props) {
                 </Link>
               )}
             </div>
-          </BlurFade>
-        </div>
-      </motion.div>
+          </div>
+        </BlurFade>
+      </div>
     </Spotlight>
   );
 }

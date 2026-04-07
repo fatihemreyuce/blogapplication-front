@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { getSupabaseClient } from "@/lib/supabase/client";
 import {
   getCurrentUserLite,
   getMyProfile,
+  resendSignupConfirmationEmail,
   signInWithPassword,
   signOutProfile,
   signUpWithPassword,
@@ -51,6 +53,19 @@ export function useProfile() {
     void refresh();
   }, [refresh]);
 
+  useEffect(() => {
+    const supabase = getSupabaseClient();
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
+      void refresh();
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [refresh]);
+
   const login = useCallback(async (email: string, password: string) => {
     const result = await signInWithPassword(email, password);
     if (!result.ok) {
@@ -79,6 +94,15 @@ export function useProfile() {
     await refresh();
   }, [refresh]);
 
+  const resendConfirmation = useCallback(async (email: string) => {
+    const result = await resendSignupConfirmationEmail(email);
+    if (!result.ok) {
+      setError(result.message ?? "Could not resend confirmation email.");
+      return result;
+    }
+    return result;
+  }, []);
+
   const saveProfile = useCallback(
     async (payload: Omit<ProfileUpsertInput, "id">) => {
       const result = await upsertMyProfile(payload);
@@ -103,9 +127,10 @@ export function useProfile() {
       login,
       signup,
       logout,
+      resendConfirmation,
       saveProfile,
       isAuthenticated: !!user,
     }),
-    [user, profile, loading, error, refresh, login, signup, logout, saveProfile]
+    [user, profile, loading, error, refresh, login, signup, logout, resendConfirmation, saveProfile]
   );
 }
