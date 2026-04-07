@@ -1,17 +1,39 @@
 import { notFound } from "next/navigation";
-import { getDictionary, hasLocale } from "./dictionaries";
+import Link from "next/link";
+import { hasLocale, getDictionary } from "./dictionaries";
+import { Hero } from "@/components/sections/hero";
+import { PostsGrid3D } from "@/components/blog/posts-grid-3d";
+import { ShimmerButton } from "@/components/magicui/shimmer-button";
+import { getPublishedPosts } from "@/services/server/post-server";
 
 export default async function HomePage({ params }: PageProps<"/[lang]">) {
   const { lang } = await params;
-
   if (!hasLocale(lang)) notFound();
-
   const dict = await getDictionary(lang);
+  const posts = await getPublishedPosts(3);
 
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-4 p-8">
-      <h1 className="text-4xl font-bold text-text">{dict.home.hero_title}</h1>
-      <p className="text-lg text-text-muted">{dict.home.hero_subtitle}</p>
-    </main>
+    <>
+      <Hero lang={lang} />
+      <section className="py-16">
+        <div className="mx-auto max-w-5xl space-y-8 px-4">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+                {lang === "tr" ? "Blog" : "Blog"}
+              </p>
+              <h2 className="text-3xl font-black tracking-tight">{dict.home.latest_posts}</h2>
+            </div>
+            <ShimmerButton>
+              <Link href={`/${lang}/blog`} className="text-sm font-semibold">
+                {dict.home.view_all}
+              </Link>
+            </ShimmerButton>
+          </div>
+
+          <PostsGrid3D posts={posts} lang={lang} emptyLabel={dict.blog.no_posts} />
+        </div>
+      </section>
+    </>
   );
 }
