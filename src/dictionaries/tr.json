@@ -22,7 +22,15 @@
     "subtitle": "Tüm yazılar",
     "no_posts": "Henüz yazı yok.",
     "search_placeholder": "Yazı ara...",
-    "results_found": "sonuç bulundu"
+    "results_found": "sonuç bulundu",
+    "filter_all": "Tümü",
+    "filter_category": "Kategori",
+    "filter_tag": "Etiket",
+    "filter_series": "Seri",
+    "clear_filters": "Filtreleri temizle",
+    "no_match": "Bu filtrelere uygun yazı bulunamadı.",
+    "showing": "gösteriliyor",
+    "filters": "Filtreler"
   },
   "post": {
     "back": "Geri Dön",
@@ -30,7 +38,16 @@
     "min_read": "dk okuma",
     "table_of_contents": "İçindekiler",
     "related_posts": "Benzer Yazılar",
-    "tags": "Etiketler"
+    "tags": "Etiketler",
+    "comments_title": "Yorumlar",
+    "comments_sub": "Düşüncelerini paylaş",
+    "comments_placeholder": "Yorumunu yaz...",
+    "comments_submit": "Gönder",
+    "comments_reply": "Yanıtla",
+    "comments_cancel": "İptal",
+    "comments_login": "Yorum yapmak için giriş yap",
+    "comments_empty": "Henüz yorum yok. İlk sen yaz!",
+    "comments_loading": "Yorumlar yükleniyor..."
   },
   "common": {
     "loading": "Yükleniyor...",

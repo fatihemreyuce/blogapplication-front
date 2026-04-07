@@ -14,7 +14,9 @@ import { hasLocale, getDictionary } from "@/app/[lang]/dictionaries";
 import { BlurFade } from "@/components/magicui/blur-fade";
 import { Spotlight } from "@/components/magicui/spotlight";
 import { Badge } from "@/components/ui/badge";
+import { PostComments } from "@/components/blog/post-comments";
 import { PostEngagementActions } from "@/components/blog/post-engagement-actions";
+import { getPublicCommentsForPost } from "@/services/server/comment-server";
 import { getPostById } from "@/services/server/post-server";
 
 function formatDate(date: string | null, lang: "tr" | "en"): string {
@@ -35,6 +37,8 @@ export default async function PostDetailPage({
   const dict = await getDictionary(lang);
   const post = await getPostById(id);
   if (!post || post.status !== "published") notFound();
+
+  const initialComments = await getPublicCommentsForPost(post.id);
 
   const readTime =
     post.reading_time ??
@@ -199,6 +203,26 @@ export default async function PostDetailPage({
             </aside>
           </BlurFade>
         </div>
+
+        <BlurFade delay={0.24}>
+          <PostComments
+            key={post.id}
+            postId={post.id}
+            lang={lang}
+            initialComments={initialComments}
+            dict={{
+              comments_title: dict.post.comments_title,
+              comments_sub: dict.post.comments_sub,
+              comments_placeholder: dict.post.comments_placeholder,
+              comments_submit: dict.post.comments_submit,
+              comments_reply: dict.post.comments_reply,
+              comments_cancel: dict.post.comments_cancel,
+              comments_login: dict.post.comments_login,
+              comments_empty: dict.post.comments_empty,
+              comments_loading: dict.post.comments_loading,
+            }}
+          />
+        </BlurFade>
       </div>
     </section>
   );

@@ -19,6 +19,8 @@ export type Post = {
   og_image: string | null;
   created_at: string | null;
   updated_at: string | null;
+  /** Opsiyonel: veritabanında kolon yoksa null kalır */
+  series_id?: string | null;
 };
 
 export type Like = {
@@ -47,6 +49,20 @@ export type PostWithEngagement = Post & PostEngagement & PostEngagementState;
 
 export type PostPreview = Pick<
   Post,
-  "id" | "title" | "slug" | "excerpt" | "cover_image" | "published_at" | "reading_time"
+  | "id"
+  | "title"
+  | "slug"
+  | "excerpt"
+  | "cover_image"
+  | "published_at"
+  | "reading_time"
+  | "category_id"
 > &
-  PostEngagement;
+  PostEngagement & {
+    /** post_tags junction — tag UUID'leri */
+    tag_ids: string[];
+    /** posts.series_id varsa doldurulur */
+    series_id: string | null;
+    /** categories tablosundan çözümlenmiş isim (opsiyonel) */
+    category_name: string | null;
+  };

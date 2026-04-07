@@ -22,7 +22,15 @@
     "subtitle": "All posts",
     "no_posts": "No posts yet.",
     "search_placeholder": "Search posts...",
-    "results_found": "results found"
+    "results_found": "results found",
+    "filter_all": "All",
+    "filter_category": "Category",
+    "filter_tag": "Tag",
+    "filter_series": "Series",
+    "clear_filters": "Clear filters",
+    "no_match": "No posts match these filters.",
+    "showing": "showing",
+    "filters": "Filters"
   },
   "post": {
     "back": "Go Back",
@@ -30,7 +38,16 @@
     "min_read": "min read",
     "table_of_contents": "Table of Contents",
     "related_posts": "Related Posts",
-    "tags": "Tags"
+    "tags": "Tags",
+    "comments_title": "Comments",
+    "comments_sub": "Share your thoughts",
+    "comments_placeholder": "Write a comment...",
+    "comments_submit": "Post",
+    "comments_reply": "Reply",
+    "comments_cancel": "Cancel",
+    "comments_login": "Sign in to comment",
+    "comments_empty": "No comments yet. Be the first!",
+    "comments_loading": "Loading comments..."
   },
   "common": {
     "loading": "Loading...",

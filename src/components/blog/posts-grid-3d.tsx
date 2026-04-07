@@ -81,6 +81,11 @@ function PostCard({ post, lang, index }: { post: PostPreview; lang: Locale; inde
               </div>
 
               <CardHeader className="space-y-2 p-5">
+                {post.category_name ? (
+                  <span className="inline-flex w-fit rounded-md border border-primary/25 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
+                    {post.category_name}
+                  </span>
+                ) : null}
                 <CardTitle className="line-clamp-2 text-lg font-bold">{post.title}</CardTitle>
                 <p className="text-xs text-text-subtle">
                   {formatDate(post.published_at, lang)} • {post.reading_time ?? 1}{" "}

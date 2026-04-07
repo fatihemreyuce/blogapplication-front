@@ -12,6 +12,8 @@ import type {
 const postSelect =
   "id,title,slug,content,excerpt,cover_image,author_id,category_id,status,published_at,scheduled_at,reading_time,views,is_featured,meta_description,og_image,created_at,updated_at";
 
+const postSelectWithSeries = `${postSelect},series_id`;
+
 function estimateReadTime(content: string | null): number {
   if (!content) return 1;
   const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
@@ -38,6 +40,7 @@ function normalizePost(row: Partial<Post>): Post {
     og_image: row.og_image ?? null,
     created_at: row.created_at ?? null,
     updated_at: row.updated_at ?? null,
+    series_id: row.series_id ?? null,
   };
 }
 
@@ -50,6 +53,10 @@ function toPreview(post: Post): PostPreview {
     cover_image: post.cover_image,
     published_at: post.published_at,
     reading_time: post.reading_time ?? estimateReadTime(post.content),
+    category_id: post.category_id,
+    tag_ids: [],
+    series_id: post.series_id ?? null,
+    category_name: null,
     likes_count: 0,
     bookmarks_count: 0,
   };
@@ -88,21 +95,91 @@ async function getEngagementByPostIds(postIds: string[]) {
   return merged;
 }
 
+async function getPostTagLinks(postIds: string[]): Promise<Map<string, string[]>> {
+  if (postIds.length === 0) return new Map();
+  const supabase = await createServerClient();
+  const { data, error } = await supabase
+    .from("post_tags" as never)
+    .select("post_id,tag_id")
+    .in("post_id", postIds);
+  if (error || !data) return new Map();
+  const map = new Map<string, string[]>();
+  for (const row of data as { post_id: string; tag_id: string }[]) {
+    const list = map.get(row.post_id) ?? [];
+    list.push(row.tag_id);
+    map.set(row.post_id, list);
+  }
+  return map;
+}
+
+export type BlogTaxonomyItem = { id: string; name: string };
+
+export async function getBlogTaxonomy(): Promise<{
+  categories: BlogTaxonomyItem[];
+  tags: BlogTaxonomyItem[];
+  series: BlogTaxonomyItem[];
+}> {
+  const supabase = await createServerClient();
+
+  const [catRes, tagRes, serRes] = await Promise.all([
+    supabase.from("categories" as never).select("id,name,title").order("id"),
+    supabase.from("tags" as never).select("id,name,title").order("id"),
+    supabase.from("series" as never).select("id,name,title").order("id"),
+  ]);
+
+  const pickName = (row: { name?: string | null; title?: string | null }) =>
+    row.name?.trim() || row.title?.trim() || "—";
+
+  const categories = ((catRes.data ?? []) as { id: string; name?: string; title?: string }[]).map(
+    (r) => ({ id: r.id, name: pickName(r) })
+  );
+  const tags = ((tagRes.data ?? []) as { id: string; name?: string; title?: string }[]).map((r) => ({
+    id: r.id,
+    name: pickName(r),
+  }));
+  const series = ((serRes.data ?? []) as { id: string; name?: string; title?: string }[]).map((r) => ({
+    id: r.id,
+    name: pickName(r),
+  }));
+
+  return { categories, tags, series };
+}
+
 async function enrichPreviews(posts: PostPreview[]): Promise<PostPreview[]> {
-  const engagement = await getEngagementByPostIds(posts.map((post) => post.id));
+  const ids = posts.map((post) => post.id);
+  const [engagement, tagMap] = await Promise.all([
+    getEngagementByPostIds(ids),
+    getPostTagLinks(ids),
+  ]);
+
   return posts.map((post) => ({
     ...post,
+    tag_ids: tagMap.get(post.id) ?? [],
     likes_count: engagement.get(post.id)?.likes ?? 0,
     bookmarks_count: engagement.get(post.id)?.bookmarks ?? 0,
   }));
 }
 
-export async function getPublishedPosts(limit?: number): Promise<PostPreview[]> {
-  const supabase = await createServerClient();
+export function attachCategoryNames(
+  posts: PostPreview[],
+  categories: BlogTaxonomyItem[]
+): PostPreview[] {
+  const map = new Map(categories.map((c) => [c.id, c.name]));
+  return posts.map((post) => ({
+    ...post,
+    category_name: post.category_id ? map.get(post.category_id) ?? null : null,
+  }));
+}
 
+async function fetchPublishedRows(
+  supabase: Awaited<ReturnType<typeof createServerClient>>,
+  limit: number | undefined,
+  useSeries: boolean
+) {
+  const select = useSeries ? postSelectWithSeries : postSelect;
   let query = supabase
     .from("posts")
-    .select(postSelect)
+    .select(select)
     .eq("status", "published")
     .order("published_at", { ascending: false, nullsFirst: false });
 
@@ -110,7 +187,48 @@ export async function getPublishedPosts(limit?: number): Promise<PostPreview[]> 
     query = query.limit(limit);
   }
 
-  const { data, error } = await query;
+  const result = await query;
+  if (
+    useSeries &&
+    result.error &&
+    /series_id|column/i.test(result.error.message ?? "")
+  ) {
+    return fetchPublishedRows(supabase, limit, false);
+  }
+  return result;
+}
+
+async function fetchFallbackRows(
+  supabase: Awaited<ReturnType<typeof createServerClient>>,
+  limit: number | undefined,
+  useSeries: boolean
+) {
+  const select = useSeries ? postSelectWithSeries : postSelect;
+  let query = supabase
+    .from("posts")
+    .select(select)
+    .order("published_at", { ascending: false, nullsFirst: false })
+    .order("created_at", { ascending: false, nullsFirst: false });
+
+  if (typeof limit === "number") {
+    query = query.limit(limit);
+  }
+
+  const result = await query;
+  if (
+    useSeries &&
+    result.error &&
+    /series_id|column/i.test(result.error.message ?? "")
+  ) {
+    return fetchFallbackRows(supabase, limit, false);
+  }
+  return result;
+}
+
+export async function getPublishedPosts(limit?: number): Promise<PostPreview[]> {
+  const supabase = await createServerClient();
+
+  const { data, error } = await fetchPublishedRows(supabase, limit, true);
 
   if (error) {
     console.error("Failed to fetch published posts:", error?.message);
@@ -122,19 +240,11 @@ export async function getPublishedPosts(limit?: number): Promise<PostPreview[]> 
     return enrichPreviews(previews);
   }
 
-  // Fallback: bazı paneller farklı status formatı kullanabildiği için,
-  // published sonucu boşsa en güncel yazıları status filtresiz göster.
-  let fallbackQuery = supabase
-    .from("posts")
-    .select(postSelect)
-    .order("published_at", { ascending: false, nullsFirst: false })
-    .order("created_at", { ascending: false, nullsFirst: false });
-
-  if (typeof limit === "number") {
-    fallbackQuery = fallbackQuery.limit(limit);
-  }
-
-  const { data: fallbackData, error: fallbackError } = await fallbackQuery;
+  const { data: fallbackData, error: fallbackError } = await fetchFallbackRows(
+    supabase,
+    limit,
+    true
+  );
   if (fallbackError || !fallbackData) {
     console.error("Failed to fetch fallback posts:", fallbackError?.message);
     return [];
