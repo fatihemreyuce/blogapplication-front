@@ -62,6 +62,8 @@ export function PostEngagementActions({
       if (!error) {
         setLiked(false);
         setLikes((value) => Math.max(0, value - 1));
+      } else {
+        setMessage(error.message);
       }
     } else {
       const { error } = await supabase
@@ -70,6 +72,8 @@ export function PostEngagementActions({
       if (!error) {
         setLiked(true);
         setLikes((value) => value + 1);
+      } else {
+        setMessage(error.message);
       }
     }
     setLoadingLike(false);
@@ -94,6 +98,8 @@ export function PostEngagementActions({
       if (!error) {
         setBookmarked(false);
         setBookmarks((value) => Math.max(0, value - 1));
+      } else {
+        setMessage(error.message);
       }
     } else {
       const { error } = await supabase
@@ -102,6 +108,8 @@ export function PostEngagementActions({
       if (!error) {
         setBookmarked(true);
         setBookmarks((value) => value + 1);
+      } else {
+        setMessage(error.message);
       }
     }
     setLoadingBookmark(false);

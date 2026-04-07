@@ -4,7 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { LogOut } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
+import { useProfile } from "@/hooks/use-profile";
 import type { Locale } from "@/app/[lang]/dictionaries";
 
 type NavItem = { label: string; href: string };
@@ -24,6 +26,13 @@ export function HeaderNav({
 }: Props) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { isAuthenticated, logout, loading, profile, user } = useProfile();
+  const authLabels =
+    lang === "tr"
+      ? { login: "Giriş", signup: "Kayıt", logout: "Çıkış" }
+      : { login: "Login", signup: "Sign up", logout: "Logout" };
+  const avatarLetter = (profile?.full_name?.[0] ?? profile?.username?.[0] ?? user?.email?.[0] ?? "U").toUpperCase();
+  const userLabel = profile?.username ?? profile?.full_name ?? user?.email ?? "User";
 
   const otherLang: Locale = lang === "tr" ? "en" : "tr";
   const langSwitchHref = pathname.replace(`/${lang}`, `/${otherLang}`);
@@ -67,6 +76,43 @@ export function HeaderNav({
 
       {/* ── Desktop: sağ aksiyonlar ── */}
       <div className="hidden md:flex items-center gap-1">
+        {!loading && !isAuthenticated ? (
+          <>
+            <Link
+              href={`/${lang}/login`}
+              className="flex h-8 items-center rounded-full border border-border/60 bg-surface/80 px-3 text-xs font-semibold text-text-muted transition-all hover:border-primary/30 hover:text-foreground"
+            >
+              {authLabels.login}
+            </Link>
+            <Link
+              href={`/${lang}/signup`}
+              className="flex h-8 items-center rounded-full border border-primary/30 bg-primary/10 px-3 text-xs font-semibold text-primary transition-all hover:bg-primary/15"
+            >
+              {authLabels.signup}
+            </Link>
+          </>
+        ) : null}
+
+        {!loading && isAuthenticated ? (
+          <div className="flex items-center gap-1.5">
+            <div className="flex h-8 max-w-[140px] items-center gap-2 rounded-full border border-border/60 bg-surface/80 px-2 pr-2.5 text-xs text-text-muted">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-blue-500 text-[10px] font-bold text-white">
+                {avatarLetter}
+              </span>
+              <span className="truncate">{userLabel}</span>
+            </div>
+            <button
+              onClick={async () => {
+                await logout();
+              }}
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-border/60 bg-surface/80 text-text-muted transition-all hover:border-primary/30 hover:text-foreground"
+              aria-label={authLabels.logout}
+            >
+              <LogOut size={14} />
+            </button>
+          </div>
+        ) : null}
+
         {/* Dil butonu */}
         <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.95 }}>
           <Link
@@ -138,6 +184,56 @@ export function HeaderNav({
             <div className="h-px w-full bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
 
             <nav className="flex flex-col gap-0.5 p-2">
+              {!loading && !isAuthenticated ? (
+                <>
+                  <Link
+                    href={`/${lang}/login`}
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center rounded-xl px-3.5 py-2.5 text-sm font-medium text-text-muted transition-colors hover:bg-surface-2 hover:text-foreground"
+                  >
+                    {authLabels.login}
+                  </Link>
+                  <Link
+                    href={`/${lang}/signup`}
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center rounded-xl px-3.5 py-2.5 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
+                  >
+                    {authLabels.signup}
+                  </Link>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="mx-1 my-1 h-px bg-border/60"
+                  />
+                </>
+              ) : null}
+
+              {!loading && isAuthenticated ? (
+                <>
+                  <div className="mx-1 mb-1 flex items-center gap-2 rounded-xl border border-border/60 bg-surface/60 px-3 py-2">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-blue-500 text-[11px] font-bold text-white">
+                      {avatarLetter}
+                    </span>
+                    <span className="truncate text-sm text-text-muted">{userLabel}</span>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      await logout();
+                      setMenuOpen(false);
+                    }}
+                    className="flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-medium text-text-muted transition-colors hover:bg-surface-2 hover:text-foreground"
+                  >
+                    <LogOut size={14} />
+                    {authLabels.logout}
+                  </button>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="mx-1 my-1 h-px bg-border/60"
+                  />
+                </>
+              ) : null}
+
               {navItems.map((item, i) => {
                 const active = isActive(item.href);
                 return (
