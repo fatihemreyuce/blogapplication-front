@@ -15,12 +15,10 @@ const content = {
     bio: "Full-stack geliştirici ve tasarımcı. Modern web teknolojileri, kullanıcı deneyimi ve minimalist tasarım üzerine yazıyorum.",
     cta_primary: "Yazıları Oku",
     cta_secondary: "Hakkımda",
-    cardTitle: "Full-Stack Developer",
-    location: "Türkiye",
     stats: [
-      { value: "2+", label: "Yıl" },
-      { value: "12", label: "Proje" },
       { value: "48", label: "Yazı" },
+      { value: "6", label: "Kategori" },
+      { value: "1K+", label: "Okuyucu" },
     ],
     badge: "Açık müsait",
   },
@@ -31,12 +29,10 @@ const content = {
     bio: "Full-stack developer and designer. I write about modern web technologies, user experience, and minimalist design.",
     cta_primary: "Read Posts",
     cta_secondary: "About Me",
-    cardTitle: "Full-Stack Developer",
-    location: "Turkey",
     stats: [
-      { value: "2+", label: "Years" },
-      { value: "12", label: "Projects" },
       { value: "48", label: "Posts" },
+      { value: "6", label: "Categories" },
+      { value: "1K+", label: "Readers" },
     ],
     badge: "Open to work",
   },
@@ -155,9 +151,7 @@ export function Hero({ lang }: Props) {
         {/* Sağ: 3D Profile Card */}
         <BlurFade delay={0.2} className="flex-1 flex items-center justify-center w-full max-w-sm md:max-w-none">
           <ProfileCard
-            name={t.name}
-            title={t.cardTitle}
-            location={t.location}
+            lang={lang}
             stats={t.stats}
           />
         </BlurFade>

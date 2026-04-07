@@ -1,22 +1,20 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { hasLocale } from "@/app/[lang]/dictionaries";
-import { AboutHero } from "@/components/sections/about-hero";
-import { TechStack } from "@/components/sections/tech-stack";
-import { Timeline } from "@/components/sections/timeline";
-import { Values } from "@/components/sections/values";
-import { GridPattern } from "@/components/magicui/grid-pattern";
+import { BlogAboutHero } from "@/components/sections/blog-about-hero";
+import { BlogTopics } from "@/components/sections/blog-topics";
+import { BlogMission } from "@/components/sections/blog-mission";
 
 export async function generateMetadata({
   params,
 }: PageProps<"/[lang]/hakkinda">): Promise<Metadata> {
   const { lang } = await params;
   return {
-    title: lang === "tr" ? "Hakkımda" : "About Me",
+    title: lang === "tr" ? "Blog Hakkında" : "About the Blog",
     description:
       lang === "tr"
-        ? "Full-stack geliştirici ve tasarımcı hakkında bilgi."
-        : "About a full-stack developer and designer.",
+        ? "Bu blog hakkında — neler yazıyoruz, neden yazıyoruz."
+        : "About this blog — what we write, why we write it.",
   };
 }
 
@@ -28,31 +26,20 @@ export default async function AboutPage({
 
   return (
     <div className="relative">
-      {/* Subtle arka plan deseni */}
-      <GridPattern className="opacity-40 [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,white,transparent)]" />
+      <BlogAboutHero lang={lang} />
 
-      <AboutHero lang={lang} />
+      <Divider />
+      <BlogTopics lang={lang} />
 
-      {/* Section divider */}
-      <SectionDivider />
+      <Divider />
+      <BlogMission lang={lang} />
 
-      <TechStack lang={lang} />
-
-      <SectionDivider />
-
-      <Timeline lang={lang} />
-
-      <SectionDivider />
-
-      <Values lang={lang} />
-
-      {/* Alt boşluk */}
       <div className="h-16" />
     </div>
   );
 }
 
-function SectionDivider() {
+function Divider() {
   return (
     <div className="mx-auto max-w-5xl px-4">
       <div className="h-px w-full bg-gradient-to-r from-transparent via-border to-transparent" />

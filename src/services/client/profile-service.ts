@@ -47,14 +47,16 @@ export async function signUpWithPassword(input: {
     };
   }
 
-  const { error: profileError } = await supabase.from("profiles").upsert(
-    {
-      id: data.user.id,
-      username: input.username,
-      full_name: input.full_name,
-      role: "user",
-      active: true,
-    },
+  const { error: profileError } = await supabase.from("profiles" as never).upsert(
+    [
+      {
+        id: data.user.id,
+        username: input.username,
+        full_name: input.full_name,
+        role: "user",
+        active: true,
+      },
+    ] as never,
     { onConflict: "id" }
   );
 
@@ -81,7 +83,7 @@ export async function getMyProfile(): Promise<Profile | null> {
 
   const supabase = getSupabaseClient();
   const { data, error } = await supabase
-    .from("profiles")
+    .from("profiles" as never)
     .select("id,username,full_name,avatar_url,bio,website,role,created_at,active")
     .eq("id", user.id)
     .maybeSingle();
@@ -97,11 +99,13 @@ export async function upsertMyProfile(
   if (!user) return { ok: false, message: "Unauthorized" };
 
   const supabase = getSupabaseClient();
-  const { error } = await supabase.from("profiles").upsert(
-    {
-      id: user.id,
-      ...payload,
-    },
+  const { error } = await supabase.from("profiles" as never).upsert(
+    [
+      {
+        id: user.id,
+        ...payload,
+      },
+    ] as never,
     { onConflict: "id" }
   );
   if (error) return { ok: false, message: error.message };

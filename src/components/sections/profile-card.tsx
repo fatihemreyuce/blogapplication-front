@@ -7,24 +7,24 @@ import {
   useTransform,
 } from "framer-motion";
 import { useRef } from "react";
+import { BookOpen, Tag, Layers, Rss } from "lucide-react";
+import type { Locale } from "@/app/[lang]/dictionaries";
 
-const techBadges = [
-  { label: "React", color: "#61dafb", angle: -25, radius: 155 },
-  { label: "Next.js", color: "#ffffff", angle: 20, radius: 165 },
-  { label: "TypeScript", color: "#3178c6", angle: 65, radius: 150 },
-  { label: "Supabase", color: "#3ecf8e", angle: 110, radius: 160 },
-  { label: "Tailwind", color: "#38bdf8", angle: 200, radius: 158 },
-  { label: "Figma", color: "#f24e1e", angle: 250, radius: 152 },
+const topicBadges = [
+  { label: "Frontend",  color: "#8b5cf6", angle: -30,  radius: 155 },
+  { label: "Backend",   color: "#34d399", angle: 15,   radius: 165 },
+  { label: "Tasarım",   color: "#f97316", angle: 60,   radius: 150 },
+  { label: "Araçlar",   color: "#60a5fa", angle: 105,  radius: 160 },
+  { label: "Fikirler",  color: "#fbbf24", angle: 205,  radius: 158 },
+  { label: "Projeler",  color: "#a78bfa", angle: 250,  radius: 152 },
 ];
 
 type Props = {
-  name: string;
-  title: string;
-  location: string;
+  lang: Locale;
   stats: Array<{ value: string; label: string }>;
 };
 
-export function ProfileCard({ name, title, location, stats }: Props) {
+export function ProfileCard({ lang, stats }: Props) {
   const ref = useRef<HTMLDivElement>(null);
 
   const mouseX = useMotionValue(0);
@@ -53,10 +53,14 @@ export function ProfileCard({ name, title, location, stats }: Props) {
     mouseY.set(0);
   }
 
+  const tagline =
+    lang === "tr" ? "Web'i anlatan blog" : "A blog about the web";
+  const latestLabel = lang === "tr" ? "Haftalık güncelleme" : "Weekly updates";
+
   return (
     <div className="relative flex items-center justify-center w-full h-full min-h-[420px]">
-      {/* Floating badges */}
-      {techBadges.map((badge, i) => {
+      {/* Floating konu badge'leri */}
+      {topicBadges.map((badge, i) => {
         const rad = (badge.angle * Math.PI) / 180;
         const x = Math.cos(rad) * badge.radius;
         const y = Math.sin(rad) * badge.radius;
@@ -65,13 +69,14 @@ export function ProfileCard({ name, title, location, stats }: Props) {
           <motion.div
             key={badge.label}
             className="absolute z-20 flex items-center gap-1.5 rounded-full border border-border/60 bg-background/80 px-3 py-1.5 text-xs font-semibold backdrop-blur-md shadow-lg"
-            style={{ left: `calc(50% + ${x}px)`, top: `calc(50% + ${y}px)`, translateX: "-50%", translateY: "-50%" }}
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{
-              opacity: 1,
-              scale: 1,
-              y: [0, -6, 0],
+            style={{
+              left: `calc(50% + ${x}px)`,
+              top: `calc(50% + ${y}px)`,
+              translateX: "-50%",
+              translateY: "-50%",
             }}
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1, y: [0, -6, 0] }}
             transition={{
               opacity: { delay: 0.6 + i * 0.08, duration: 0.4 },
               scale: { delay: 0.6 + i * 0.08, duration: 0.4, type: "spring" },
@@ -92,7 +97,7 @@ export function ProfileCard({ name, title, location, stats }: Props) {
         );
       })}
 
-      {/* 3D Card */}
+      {/* 3D Blog Kartı */}
       <motion.div
         ref={ref}
         onMouseMove={onMouseMove}
@@ -108,7 +113,7 @@ export function ProfileCard({ name, title, location, stats }: Props) {
         transition={{ duration: 0.6, delay: 0.3, type: "spring", stiffness: 120 }}
         className="relative z-10 w-[230px] cursor-pointer"
       >
-        {/* Glow halo arkada */}
+        {/* Glow */}
         <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-violet-500/20 via-blue-500/10 to-emerald-500/20 blur-2xl" />
 
         {/* Kart */}
@@ -125,46 +130,51 @@ export function ProfileCard({ name, title, location, stats }: Props) {
           />
 
           {/* Üst gradient şerit */}
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
+          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-500 via-blue-500 to-emerald-400" />
 
-          {/* Avatar */}
+          {/* Blog ikonu */}
           <motion.div style={{ translateZ: 20 }} className="mb-4 flex justify-center">
             <div className="relative">
-              <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-violet-500 via-blue-500 to-emerald-400 opacity-70 blur-sm" />
-              <div className="relative h-20 w-20 rounded-full bg-gradient-to-br from-violet-600 via-blue-600 to-emerald-500 flex items-center justify-center text-2xl font-black text-white shadow-xl">
-                {name.charAt(0)}
+              <div className="absolute -inset-2 rounded-2xl bg-gradient-to-br from-violet-500 via-blue-500 to-emerald-400 opacity-40 blur-md" />
+              <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 via-blue-600 to-emerald-500 shadow-xl">
+                <div className="absolute inset-px rounded-[14px] bg-gradient-to-b from-white/20 to-transparent" />
+                <BookOpen size={26} className="relative z-10 text-white" />
               </div>
-              {/* Online dot */}
-              <span className="absolute bottom-0.5 right-0.5 h-3.5 w-3.5 rounded-full border-2 border-surface bg-emerald-400 shadow-sm shadow-emerald-400/50" />
             </div>
           </motion.div>
 
-          {/* İsim */}
+          {/* Başlık */}
           <motion.div style={{ translateZ: 16 }} className="text-center space-y-1">
-            <p className="font-bold text-foreground">{name}</p>
-            <p className="text-xs text-text-muted">{title}</p>
+            <p className="font-black text-foreground text-base">Blog</p>
+            <p className="text-[11px] text-text-muted">{tagline}</p>
           </motion.div>
 
           {/* Separator */}
           <div className="my-4 h-px bg-border/60" />
 
-          {/* Stats */}
+          {/* İstatistikler */}
           <motion.div style={{ translateZ: 12 }} className="grid grid-cols-3 gap-2 text-center">
             {stats.map((s) => (
               <div key={s.label} className="space-y-0.5">
-                <p className="text-sm font-bold text-foreground">{s.value}</p>
+                <p className="text-sm font-black text-foreground">{s.value}</p>
                 <p className="text-[10px] text-text-subtle">{s.label}</p>
               </div>
             ))}
           </motion.div>
 
-          {/* Konum */}
-          <motion.div style={{ translateZ: 8 }} className="mt-4 flex items-center justify-center gap-1.5 text-[11px] text-text-subtle">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-              <circle cx="12" cy="10" r="3" />
-            </svg>
-            {location}
+          {/* Separator */}
+          <div className="my-4 h-px bg-border/60" />
+
+          {/* Alt bilgi */}
+          <motion.div
+            style={{ translateZ: 8 }}
+            className="flex items-center justify-center gap-1.5 text-[11px] text-emerald-400"
+          >
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            </span>
+            {latestLabel}
           </motion.div>
         </motion.div>
       </motion.div>

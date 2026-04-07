@@ -55,7 +55,7 @@ export function PostEngagementActions({
     const supabase = getSupabaseClient();
     if (liked) {
       const { error } = await supabase
-        .from("likes")
+        .from("likes" as never)
         .delete()
         .eq("post_id", postId)
         .eq("user_id", user.id);
@@ -67,8 +67,8 @@ export function PostEngagementActions({
       }
     } else {
       const { error } = await supabase
-        .from("likes")
-        .insert({ post_id: postId, user_id: user.id });
+        .from("likes" as never)
+        .insert([{ post_id: postId, user_id: user.id }] as never);
       if (!error) {
         setLiked(true);
         setLikes((value) => value + 1);
@@ -91,7 +91,7 @@ export function PostEngagementActions({
     const supabase = getSupabaseClient();
     if (bookmarked) {
       const { error } = await supabase
-        .from("bookmarks")
+        .from("bookmarks" as never)
         .delete()
         .eq("post_id", postId)
         .eq("user_id", user.id);
@@ -103,8 +103,8 @@ export function PostEngagementActions({
       }
     } else {
       const { error } = await supabase
-        .from("bookmarks")
-        .insert({ post_id: postId, user_id: user.id });
+        .from("bookmarks" as never)
+        .insert([{ post_id: postId, user_id: user.id }] as never);
       if (!error) {
         setBookmarked(true);
         setBookmarks((value) => value + 1);
