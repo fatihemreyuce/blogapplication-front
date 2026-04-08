@@ -23,6 +23,12 @@
     "empty": "Henüz kategori yok.",
     "view_posts": "Yazıları gör"
   },
+  "tags_home": {
+    "title": "Etiketler",
+    "subtitle": "Popüler etiketlerden birini seç ve içerikleri hızla filtrele.",
+    "empty": "Henüz etiket yok.",
+    "view_posts": "Tümü"
+  },
   "blog": {
     "title": "Blog",
     "subtitle": "Tüm yazılar",

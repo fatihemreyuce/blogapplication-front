@@ -67,8 +67,8 @@ function CommentCard({
 
   return (
     <motion.div
-      style={{ marginLeft: depth > 0 ? Math.min(depth * 14, 56) : 0 }}
-      className="relative"
+      style={{ marginLeft: depth > 0 ? Math.min(depth * 6, 18) : 0 }}
+      className="relative overflow-hidden"
     >
       <motion.div
         ref={ref}
@@ -83,23 +83,23 @@ function CommentCard({
           mx.set(0);
           my.set(0);
         }}
-        className="rounded-2xl border border-border/60 bg-surface/75 p-4 backdrop-blur-sm transition-shadow hover:border-primary/25 hover:shadow-lg hover:shadow-violet-500/5"
+        className="rounded-2xl border border-border/60 bg-surface/75 p-3 backdrop-blur-sm transition-shadow hover:border-primary/25 hover:shadow-lg hover:shadow-violet-500/5 md:p-4"
       >
         <div className="flex gap-3">
           <div className="relative shrink-0">
             <div className="absolute -inset-0.5 rounded-full bg-gradient-to-br from-violet-500/40 to-blue-500/40 opacity-70 blur-sm" />
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-blue-600 text-sm font-bold text-white">
+            <div className="relative flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-blue-600 text-sm font-bold text-white md:h-10 md:w-10">
               {(node.author_name ?? "?").charAt(0).toUpperCase()}
             </div>
           </div>
           <div className="min-w-0 flex-1 space-y-1">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="font-semibold text-foreground">{node.author_name}</span>
+              <span className="break-words font-semibold text-foreground">{node.author_name}</span>
               <span className="text-[11px] text-text-subtle">
                 {formatCommentDate(node.created_at, lang)}
               </span>
             </div>
-            <p className="whitespace-pre-wrap text-sm leading-relaxed text-text-muted">
+            <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-text-muted">
               {node.content}
             </p>
             <div className="pt-1">
@@ -117,7 +117,7 @@ function CommentCard({
       </motion.div>
 
       {node.replies.length > 0 ? (
-        <div className="mt-3 space-y-3 border-l border-border/40 pl-3">
+        <div className="mt-3 space-y-3 border-l border-border/40 pl-2 md:pl-3">
           {node.replies.map((child) => (
             <CommentCard
               key={child.id}

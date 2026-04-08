@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Heart, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getSupabaseClient } from "@/lib/supabase/client";
@@ -22,6 +23,7 @@ export function PostEngagementActions({
   initialLiked,
   initialBookmarked,
 }: Props) {
+  const router = useRouter();
   const [likes, setLikes] = useState(initialLikes);
   const [bookmarks, setBookmarks] = useState(initialBookmarks);
   const [liked, setLiked] = useState(initialLiked);
@@ -89,6 +91,13 @@ export function PostEngagementActions({
     }
 
     const supabase = getSupabaseClient();
+    async function syncBookmarkCount() {
+      const { count } = await supabase
+        .from("bookmarks" as never)
+        .select("post_id", { count: "exact", head: true })
+        .eq("post_id", postId);
+      if (typeof count === "number") setBookmarks(count);
+    }
     if (bookmarked) {
       const { error } = await supabase
         .from("bookmarks" as never)
@@ -97,17 +106,40 @@ export function PostEngagementActions({
         .eq("user_id", user.id);
       if (!error) {
         setBookmarked(false);
-        setBookmarks((value) => Math.max(0, value - 1));
+        await syncBookmarkCount();
+        router.refresh();
       } else {
         setMessage(error.message);
       }
     } else {
       const { error } = await supabase
         .from("bookmarks" as never)
-        .insert([{ post_id: postId, user_id: user.id }] as never);
+        .upsert([{ post_id: postId, user_id: user.id }] as never, {
+          onConflict: "user_id,post_id",
+        });
       if (!error) {
-        setBookmarked(true);
-        setBookmarks((value) => value + 1);
+        // Persist doğrulaması: gerçekten yazıldı mı?
+        const { data: row, error: verifyError } = await supabase
+          .from("bookmarks" as never)
+          .select("post_id")
+          .eq("post_id", postId)
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (verifyError) {
+          setMessage(verifyError.message);
+        }
+        const persisted = !!row;
+        setBookmarked(persisted);
+        if (persisted) {
+          await syncBookmarkCount();
+          router.refresh();
+        } else {
+          setMessage(
+            lang === "tr"
+              ? "Kaydetme doğrulanamadı. Lütfen tekrar dene."
+              : "Could not verify bookmark persistence. Please try again."
+          );
+        }
       } else {
         setMessage(error.message);
       }

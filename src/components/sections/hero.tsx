@@ -19,9 +19,9 @@ const content = {
     cta_secondary: "Blog Hakkında",
     badge: "Haftalık güncelleme",
     stats: [
-      { value: "48", label: "Yazı" },
-      { value: "6", label: "Kategori" },
-      { value: "1K+", label: "Okuyucu" },
+      { value: "2", label: "Yazı" },
+      { value: "4", label: "Kategori" },
+      { value: "100+", label: "Okuyucu" },
     ],
   },
   en: {

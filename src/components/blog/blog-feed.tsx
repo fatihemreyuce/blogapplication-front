@@ -39,6 +39,10 @@ type Props = {
   dict: DictBlog;
   /** URL'den gelen kategori (ör. kategoriler sayfasından) */
   initialCategoryId?: string | null;
+  /** URL'den gelen etiket */
+  initialTagId?: string | null;
+  /** URL'den gelen seri */
+  initialSeriesId?: string | null;
 };
 
 function Chip({
@@ -65,11 +69,21 @@ function Chip({
   );
 }
 
-export function BlogFeed({ posts, taxonomy, lang, dict, initialCategoryId }: Props) {
+export function BlogFeed({
+  posts,
+  taxonomy,
+  lang,
+  dict,
+  initialCategoryId,
+  initialTagId,
+  initialSeriesId,
+}: Props) {
+  const [queryInput, setQueryInput] = useState("");
   const [query, setQuery] = useState("");
   const [categoryId, setCategoryId] = useState<string | null>(initialCategoryId ?? null);
-  const [tagId, setTagId] = useState<string | null>(null);
-  const [seriesId, setSeriesId] = useState<string | null>(null);
+  const [tagId, setTagId] = useState<string | null>(initialTagId ?? null);
+  const [seriesId, setSeriesId] = useState<string | null>(initialSeriesId ?? null);
+  const [isFiltering, setIsFiltering] = useState(false);
 
   const hasSeriesOnPosts = useMemo(
     () => posts.some((p) => p.series_id != null && p.series_id !== ""),
@@ -80,6 +94,27 @@ export function BlogFeed({ posts, taxonomy, lang, dict, initialCategoryId }: Pro
   useEffect(() => {
     setCategoryId(initialCategoryId ?? null);
   }, [initialCategoryId]);
+  useEffect(() => {
+    setTagId(initialTagId ?? null);
+  }, [initialTagId]);
+  useEffect(() => {
+    setSeriesId(initialSeriesId ?? null);
+  }, [initialSeriesId]);
+
+  // Search input delay (debounce)
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      setQuery(queryInput);
+    }, 350);
+    return () => window.clearTimeout(t);
+  }, [queryInput]);
+
+  // Short loading feedback for filter/search transitions
+  useEffect(() => {
+    setIsFiltering(true);
+    const t = window.setTimeout(() => setIsFiltering(false), 220);
+    return () => window.clearTimeout(t);
+  }, [query, categoryId, tagId, seriesId]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -99,6 +134,7 @@ export function BlogFeed({ posts, taxonomy, lang, dict, initialCategoryId }: Pro
     query.trim().length > 0 || categoryId != null || tagId != null || seriesId != null;
 
   function clearAll() {
+    setQueryInput("");
     setQuery("");
     setCategoryId(null);
     setTagId(null);
@@ -153,16 +189,16 @@ export function BlogFeed({ posts, taxonomy, lang, dict, initialCategoryId }: Pro
                     size={18}
                   />
                   <input
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
+                    value={queryInput}
+                    onChange={(e) => setQueryInput(e.target.value)}
                     placeholder={dict.search_placeholder}
                     className="h-12 w-full rounded-2xl border border-border/70 bg-background/70 pl-11 pr-10 text-sm outline-none transition placeholder:text-text-subtle focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
                   />
-                  {query ? (
+                  {queryInput ? (
                     <button
                       type="button"
                       aria-label="Clear search"
-                      onClick={() => setQuery("")}
+                      onClick={() => setQueryInput("")}
                       className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-text-subtle hover:text-foreground"
                     >
                       <X size={16} />
@@ -265,7 +301,18 @@ export function BlogFeed({ posts, taxonomy, lang, dict, initialCategoryId }: Pro
           </Spotlight>
         </BlurFade>
 
-        <PostsGrid3D posts={filtered} lang={lang} emptyLabel={emptyLabel} />
+        {isFiltering ? (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-[430px] animate-pulse rounded-2xl border border-border/60 bg-surface/65"
+              />
+            ))}
+          </div>
+        ) : (
+          <PostsGrid3D posts={filtered} lang={lang} emptyLabel={emptyLabel} />
+        )}
       </div>
     </section>
   );

@@ -23,6 +23,12 @@
     "empty": "No categories yet.",
     "view_posts": "View posts"
   },
+  "tags_home": {
+    "title": "Tags",
+    "subtitle": "Pick a popular tag and instantly filter related posts.",
+    "empty": "No tags yet.",
+    "view_posts": "View all"
+  },
   "blog": {
     "title": "Blog",
     "subtitle": "All posts",

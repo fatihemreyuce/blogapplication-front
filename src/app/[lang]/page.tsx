@@ -3,21 +3,27 @@ import Link from "next/link";
 import { hasLocale, getDictionary } from "./dictionaries";
 import { Hero } from "@/components/sections/hero";
 import { HomeCategoriesStrip } from "@/components/sections/home-categories-strip";
+import { HomeTagsStrip } from "@/components/sections/home-tags-strip";
 import { PostsGrid3D } from "@/components/blog/posts-grid-3d";
 import { ShimmerButton } from "@/components/magicui/shimmer-button";
-import { getPublishedPosts } from "@/services/server/post-server";
+import { getBlogTaxonomy, getPublishedPosts } from "@/services/server/post-server";
 import { getCategories } from "@/services/server/category-server";
 
 export default async function HomePage({ params }: PageProps<"/[lang]">) {
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
   const dict = await getDictionary(lang);
-  const [posts, categories] = await Promise.all([getPublishedPosts(3, lang), getCategories()]);
+  const [posts, categories, taxonomy] = await Promise.all([
+    getPublishedPosts(3, lang),
+    getCategories(),
+    getBlogTaxonomy(),
+  ]);
 
   return (
     <>
       <Hero lang={lang} />
       <HomeCategoriesStrip lang={lang} categories={categories} dict={dict.categories} />
+      <HomeTagsStrip lang={lang} tags={taxonomy.tags} dict={dict.tags_home} />
       <section className="py-16">
         <div className="mx-auto max-w-5xl space-y-8 px-4">
           <div className="flex flex-wrap items-end justify-between gap-4">
