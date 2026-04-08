@@ -9,32 +9,36 @@ import type { Locale } from "@/app/[lang]/dictionaries";
 
 const content = {
   tr: {
-    greeting: "Merhaba, ben",
-    name: "Fatih",
-    roles: ["Geliştirici", "Tasarımcı", "Yazar", "Üretici"],
-    bio: "Full-stack geliştirici ve tasarımcı. Modern web teknolojileri, kullanıcı deneyimi ve minimalist tasarım üzerine yazıyorum.",
-    cta_primary: "Yazıları Oku",
-    cta_secondary: "Hakkımda",
+    eyebrow: "Yazılım & Tasarım Blogu",
+    headline_1: "Web hakkında",
+    headline_2: "net yazılar.",
+    topics: ["Frontend", "Backend", "Tasarım", "Araçlar", "Fikirler"],
+    description:
+      "React, Next.js, Supabase ve modern web teknolojileri üzerine pratik, derinlemesine içerikler. Her hafta yeni bir yazı.",
+    cta_primary: "Yazıları Keşfet",
+    cta_secondary: "Blog Hakkında",
+    badge: "Haftalık güncelleme",
     stats: [
       { value: "48", label: "Yazı" },
       { value: "6", label: "Kategori" },
       { value: "1K+", label: "Okuyucu" },
     ],
-    badge: "Açık müsait",
   },
   en: {
-    greeting: "Hi, I'm",
-    name: "Fatih",
-    roles: ["Developer", "Designer", "Writer", "Maker"],
-    bio: "Full-stack developer and designer. I write about modern web technologies, user experience, and minimalist design.",
-    cta_primary: "Read Posts",
-    cta_secondary: "About Me",
+    eyebrow: "Software & Design Blog",
+    headline_1: "Clear writing",
+    headline_2: "about the web.",
+    topics: ["Frontend", "Backend", "Design", "Tools", "Ideas"],
+    description:
+      "Practical, in-depth content on React, Next.js, Supabase, and modern web technologies. A new post every week.",
+    cta_primary: "Explore Posts",
+    cta_secondary: "About Blog",
+    badge: "Weekly updates",
     stats: [
       { value: "48", label: "Posts" },
       { value: "6", label: "Categories" },
       { value: "1K+", label: "Readers" },
     ],
-    badge: "Open to work",
   },
 };
 
@@ -62,10 +66,10 @@ export function Hero({ lang }: Props) {
       {/* İçerik */}
       <div className="relative mx-auto flex min-h-[calc(100vh-56px)] max-w-5xl flex-col items-center justify-center gap-16 px-4 py-20 md:flex-row md:gap-8">
 
-        {/* Sol: Text */}
+        {/* Sol: Blog tanıtımı */}
         <div className="flex flex-1 flex-col gap-5 text-center md:text-left">
 
-          {/* Küçük badge */}
+          {/* Eyebrow badge */}
           <BlurFade delay={0.05}>
             <div className="inline-flex items-center self-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1.5 text-xs font-medium text-emerald-400 md:self-start">
               <span className="relative flex h-2 w-2">
@@ -79,29 +83,27 @@ export function Hero({ lang }: Props) {
           {/* Başlık */}
           <BlurFade delay={0.1}>
             <h1 className="text-4xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-              <span className="text-text-muted mb-1 block text-3xl font-medium sm:text-4xl lg:text-5xl">
-                {t.greeting}
-              </span>
+              <span className="block text-foreground">{t.headline_1}</span>
               <span className="bg-gradient-to-r from-violet-500 via-blue-500 to-emerald-400 bg-clip-text text-transparent">
-                {t.name}
+                {t.headline_2}
               </span>
             </h1>
           </BlurFade>
 
-          {/* Dönen ünvan */}
+          {/* Dönen konular */}
           <BlurFade delay={0.18}>
-            <p className="text-xl font-semibold text-text-muted sm:text-2xl">
+            <p className="text-lg font-medium text-text-muted sm:text-xl">
               <TypingRoles
-                words={t.roles}
-                className="bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text text-transparent"
+                words={t.topics}
+                className="bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text text-transparent font-bold"
               />
             </p>
           </BlurFade>
 
-          {/* Bio */}
+          {/* Açıklama */}
           <BlurFade delay={0.26}>
             <p className="max-w-md text-base leading-relaxed text-text-muted mx-auto md:mx-0">
-              {t.bio}
+              {t.description}
             </p>
           </BlurFade>
 
@@ -131,24 +133,25 @@ export function Hero({ lang }: Props) {
             </div>
           </BlurFade>
 
-          {/* Tech stack ufak gösterim */}
+          {/* Konu tag'leri */}
           <BlurFade delay={0.42}>
             <div className="flex flex-wrap items-center justify-center gap-2 md:justify-start">
-              {["React", "Next.js", "TypeScript", "Supabase", "Tailwind"].map(
-                (tech, i) => (
-                  <span
-                    key={tech}
-                    className="rounded-md border border-border/60 bg-surface/80 px-2.5 py-1 text-[11px] font-medium text-text-muted backdrop-blur-sm"
-                  >
-                    {tech}
-                  </span>
-                )
-              )}
+              {(lang === "tr"
+                ? ["Frontend", "Backend", "Tasarım", "Araçlar", "Fikirler", "Projeler"]
+                : ["Frontend", "Backend", "Design", "Tools", "Ideas", "Projects"]
+              ).map((topic) => (
+                <span
+                  key={topic}
+                  className="rounded-md border border-border/60 bg-surface/80 px-2.5 py-1 text-[11px] font-medium text-text-muted backdrop-blur-sm"
+                >
+                  {topic}
+                </span>
+              ))}
             </div>
           </BlurFade>
         </div>
 
-        {/* Sağ: 3D Profile Card */}
+        {/* Sağ: 3D Blog Kartı */}
         <BlurFade delay={0.2} className="flex-1 flex items-center justify-center w-full max-w-sm md:max-w-none">
           <ProfileCard
             lang={lang}

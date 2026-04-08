@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { BlurFade } from "@/components/magicui/blur-fade";
@@ -37,6 +37,8 @@ type Props = {
   };
   lang: Locale;
   dict: DictBlog;
+  /** URL'den gelen kategori (ör. kategoriler sayfasından) */
+  initialCategoryId?: string | null;
 };
 
 function Chip({
@@ -52,7 +54,7 @@ function Chip({
     <button
       type="button"
       onClick={onClick}
-      className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
+      className={`cursor-pointer shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
         active
           ? "border-primary/50 bg-primary/15 text-primary"
           : "border-border/70 bg-surface/80 text-text-muted hover:border-primary/30 hover:text-foreground"
@@ -63,9 +65,9 @@ function Chip({
   );
 }
 
-export function BlogFeed({ posts, taxonomy, lang, dict }: Props) {
+export function BlogFeed({ posts, taxonomy, lang, dict, initialCategoryId }: Props) {
   const [query, setQuery] = useState("");
-  const [categoryId, setCategoryId] = useState<string | null>(null);
+  const [categoryId, setCategoryId] = useState<string | null>(initialCategoryId ?? null);
   const [tagId, setTagId] = useState<string | null>(null);
   const [seriesId, setSeriesId] = useState<string | null>(null);
 
@@ -74,6 +76,10 @@ export function BlogFeed({ posts, taxonomy, lang, dict }: Props) {
     [posts]
   );
   const showSeriesFilter = hasSeriesOnPosts && taxonomy.series.length > 0;
+
+  useEffect(() => {
+    setCategoryId(initialCategoryId ?? null);
+  }, [initialCategoryId]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();

@@ -64,7 +64,7 @@ function PostCard({ post, lang, index }: { post: PostPreview; lang: Locale; inde
             onMouseLeave={onMouseLeave}
             className="block h-full"
           >
-            <Card className="h-full rounded-2xl border border-border/60 bg-surface/85 py-0 transition-all duration-300 hover:border-primary/40 hover:shadow-xl hover:shadow-violet-500/10">
+            <Card className="flex h-full min-h-[430px] flex-col rounded-2xl border border-border/60 bg-surface/85 py-0 transition-all duration-300 hover:border-primary/40 hover:shadow-xl hover:shadow-violet-500/10">
               <div className="relative h-40 overflow-hidden rounded-t-2xl border-b border-border/50 bg-gradient-to-br from-violet-600/25 via-blue-600/15 to-emerald-500/20">
                 {post.cover_image ? (
                   <img
@@ -93,7 +93,7 @@ function PostCard({ post, lang, index }: { post: PostPreview; lang: Locale; inde
                 </p>
               </CardHeader>
 
-              <CardContent className="px-5 pb-5">
+              <CardContent className="mt-auto px-5 pb-5">
                 <p className="line-clamp-3 text-sm leading-relaxed text-text-muted">
                   {post.excerpt ?? (lang === "tr" ? "Bu yazıyı okumak için tıkla." : "Click to read this post.")}
                 </p>

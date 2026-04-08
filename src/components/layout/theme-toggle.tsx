@@ -12,7 +12,7 @@ export function ThemeToggle({ label }: { label: string }) {
       aria-label={label}
       whileHover={{ scale: 1.08 }}
       whileTap={{ scale: 0.9, rotate: 15 }}
-      className="relative flex h-9 w-9 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-surface-2 hover:text-text overflow-hidden"
+      className="relative flex h-9 w-9 cursor-pointer items-center justify-center overflow-hidden rounded-lg text-text-muted transition-colors hover:bg-surface-2 hover:text-text"
     >
       <AnimatePresence mode="wait" initial={false}>
         {resolvedTheme === "dark" ? (

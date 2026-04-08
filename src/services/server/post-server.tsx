@@ -9,6 +9,8 @@ import type {
   PostWithEngagement,
 } from "@/types/post.types";
 
+type PostLocale = "tr" | "en";
+
 const postSelect =
   "id,title,slug,content,excerpt,cover_image,author_id,category_id,status,published_at,scheduled_at,reading_time,views,is_featured,meta_description,og_image,created_at,updated_at";
 
@@ -114,33 +116,49 @@ async function getPostTagLinks(postIds: string[]): Promise<Map<string, string[]>
 
 export type BlogTaxonomyItem = { id: string; name: string };
 
+async function fetchTaxonomyItems(
+  table: "categories" | "tags" | "series"
+): Promise<BlogTaxonomyItem[]> {
+  const supabase = await createServerClient();
+
+  const preferred = await supabase
+    .from(table as never)
+    .select("id,name,title")
+    .order("id");
+
+  const pickName = (row: { name?: string | null; title?: string | null }) =>
+    row.name?.trim() || row.title?.trim() || "—";
+
+  if (!preferred.error && preferred.data) {
+    return (preferred.data as { id: string; name?: string; title?: string }[]).map((r) => ({
+      id: r.id,
+      name: pickName(r),
+    }));
+  }
+
+  const fallback = await supabase
+    .from(table as never)
+    .select("id,name")
+    .order("id");
+
+  if (fallback.error || !fallback.data) return [];
+
+  return (fallback.data as { id: string; name?: string }[]).map((r) => ({
+    id: r.id,
+    name: r.name?.trim() || "—",
+  }));
+}
+
 export async function getBlogTaxonomy(): Promise<{
   categories: BlogTaxonomyItem[];
   tags: BlogTaxonomyItem[];
   series: BlogTaxonomyItem[];
 }> {
-  const supabase = await createServerClient();
-
-  const [catRes, tagRes, serRes] = await Promise.all([
-    supabase.from("categories" as never).select("id,name,title").order("id"),
-    supabase.from("tags" as never).select("id,name,title").order("id"),
-    supabase.from("series" as never).select("id,name,title").order("id"),
+  const [categories, tags, series] = await Promise.all([
+    fetchTaxonomyItems("categories"),
+    fetchTaxonomyItems("tags"),
+    fetchTaxonomyItems("series"),
   ]);
-
-  const pickName = (row: { name?: string | null; title?: string | null }) =>
-    row.name?.trim() || row.title?.trim() || "—";
-
-  const categories = ((catRes.data ?? []) as { id: string; name?: string; title?: string }[]).map(
-    (r) => ({ id: r.id, name: pickName(r) })
-  );
-  const tags = ((tagRes.data ?? []) as { id: string; name?: string; title?: string }[]).map((r) => ({
-    id: r.id,
-    name: pickName(r),
-  }));
-  const series = ((serRes.data ?? []) as { id: string; name?: string; title?: string }[]).map((r) => ({
-    id: r.id,
-    name: pickName(r),
-  }));
 
   return { categories, tags, series };
 }
@@ -174,14 +192,41 @@ export function attachCategoryNames(
 async function fetchPublishedRows(
   supabase: Awaited<ReturnType<typeof createServerClient>>,
   limit: number | undefined,
-  useSeries: boolean
+  useSeries: boolean,
+  locale?: PostLocale
 ) {
   const select = useSeries ? postSelectWithSeries : postSelect;
-  let query = supabase
-    .from("posts")
-    .select(select)
-    .eq("status", "published")
-    .order("published_at", { ascending: false, nullsFirst: false });
+  const base = supabase.from("posts").select(select).eq("status", "published");
+  let query = base.order("published_at", { ascending: false, nullsFirst: false });
+
+  // Locale column name may differ across schemas.
+  if (locale) {
+    const localizedAttempts = [
+      base.eq("language", locale).order("published_at", { ascending: false, nullsFirst: false }),
+      base.eq("lang", locale).order("published_at", { ascending: false, nullsFirst: false }),
+      base.eq("locale", locale).order("published_at", { ascending: false, nullsFirst: false }),
+    ];
+
+    for (let i = 0; i < localizedAttempts.length; i++) {
+      const attempt = localizedAttempts[i];
+      if (typeof limit === "number") {
+        attempt.limit(limit);
+      }
+      const localizedResult = await attempt;
+      if (!localizedResult.error) {
+        return localizedResult;
+      }
+      const isMissingLocaleColumn = /column/i.test(localizedResult.error.message ?? "");
+      if (!isMissingLocaleColumn) {
+        // A real query failure: bubble up.
+        return localizedResult;
+      }
+      // Try next locale column candidate.
+      if (i === localizedAttempts.length - 1) {
+        break;
+      }
+    }
+  }
 
   if (typeof limit === "number") {
     query = query.limit(limit);
@@ -201,14 +246,49 @@ async function fetchPublishedRows(
 async function fetchFallbackRows(
   supabase: Awaited<ReturnType<typeof createServerClient>>,
   limit: number | undefined,
-  useSeries: boolean
+  useSeries: boolean,
+  locale?: PostLocale
 ) {
   const select = useSeries ? postSelectWithSeries : postSelect;
-  let query = supabase
-    .from("posts")
-    .select(select)
+  const base = supabase.from("posts").select(select);
+  let query = base
     .order("published_at", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false, nullsFirst: false });
+
+  if (locale) {
+    const localizedAttempts = [
+      base
+        .eq("language", locale)
+        .order("published_at", { ascending: false, nullsFirst: false })
+        .order("created_at", { ascending: false, nullsFirst: false }),
+      base
+        .eq("lang", locale)
+        .order("published_at", { ascending: false, nullsFirst: false })
+        .order("created_at", { ascending: false, nullsFirst: false }),
+      base
+        .eq("locale", locale)
+        .order("published_at", { ascending: false, nullsFirst: false })
+        .order("created_at", { ascending: false, nullsFirst: false }),
+    ];
+
+    for (let i = 0; i < localizedAttempts.length; i++) {
+      const attempt = localizedAttempts[i];
+      if (typeof limit === "number") {
+        attempt.limit(limit);
+      }
+      const localizedResult = await attempt;
+      if (!localizedResult.error) {
+        return localizedResult;
+      }
+      const isMissingLocaleColumn = /column/i.test(localizedResult.error.message ?? "");
+      if (!isMissingLocaleColumn) {
+        return localizedResult;
+      }
+      if (i === localizedAttempts.length - 1) {
+        break;
+      }
+    }
+  }
 
   if (typeof limit === "number") {
     query = query.limit(limit);
@@ -225,10 +305,13 @@ async function fetchFallbackRows(
   return result;
 }
 
-export async function getPublishedPosts(limit?: number): Promise<PostPreview[]> {
+export async function getPublishedPosts(
+  limit?: number,
+  locale?: PostLocale
+): Promise<PostPreview[]> {
   const supabase = await createServerClient();
 
-  const { data, error } = await fetchPublishedRows(supabase, limit, true);
+  const { data, error } = await fetchPublishedRows(supabase, limit, true, locale);
 
   if (error) {
     console.error("Failed to fetch published posts:", error?.message);
@@ -243,7 +326,8 @@ export async function getPublishedPosts(limit?: number): Promise<PostPreview[]> 
   const { data: fallbackData, error: fallbackError } = await fetchFallbackRows(
     supabase,
     limit,
-    true
+    true,
+    locale
   );
   if (fallbackError || !fallbackData) {
     console.error("Failed to fetch fallback posts:", fallbackError?.message);

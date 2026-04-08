@@ -17,6 +17,12 @@
     "view_all": "View All",
     "read_more": "Read More"
   },
+  "categories": {
+    "title": "Categories",
+    "subtitle": "Browse by topic and jump straight into what you want to read.",
+    "empty": "No categories yet.",
+    "view_posts": "View posts"
+  },
   "blog": {
     "title": "Blog",
     "subtitle": "All posts",

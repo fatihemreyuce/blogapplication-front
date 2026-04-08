@@ -17,6 +17,12 @@
     "view_all": "Tümünü Gör",
     "read_more": "Devamını Oku"
   },
+  "categories": {
+    "title": "Kategoriler",
+    "subtitle": "Konulara göre keşfet, ilgini çeken yazılara hızlıca ulaş.",
+    "empty": "Henüz kategori yok.",
+    "view_posts": "Yazıları gör"
+  },
   "blog": {
     "title": "Blog",
     "subtitle": "Tüm yazılar",
