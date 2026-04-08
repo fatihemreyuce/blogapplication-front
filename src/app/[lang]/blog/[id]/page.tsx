@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { PostComments } from "@/components/blog/post-comments";
 import { PostEngagementActions } from "@/components/blog/post-engagement-actions";
 import { getPublicCommentsForPost } from "@/services/server/comment-server";
-import { getPostById } from "@/services/server/post-server";
+import { getPostById, incrementPostViews } from "@/services/server/post-server";
 
 function formatDate(date: string | null, lang: "tr" | "en"): string {
   if (!date) return lang === "tr" ? "Yayın tarihi yok" : "No publish date";
@@ -37,6 +37,8 @@ export default async function PostDetailPage({
   const dict = await getDictionary(lang);
   const post = await getPostById(id);
   if (!post || post.status !== "published") notFound();
+  const updatedViews = await incrementPostViews(post.id);
+  const liveViews = updatedViews ?? post.views ?? 0;
 
   const initialComments = await getPublicCommentsForPost(post.id);
 
@@ -110,7 +112,7 @@ export default async function PostDetailPage({
                   </span>
                   <span className="inline-flex items-center gap-1.5">
                     <Eye size={14} />
-                    {post.views ?? 0}
+                    {liveViews}
                   </span>
                   <span className="inline-flex items-center gap-1.5">
                     <Heart size={14} />
@@ -155,7 +157,7 @@ export default async function PostDetailPage({
                     <p className="text-[11px] text-text-subtle">
                       {lang === "tr" ? "Görüntülenme" : "Views"}
                     </p>
-                    <p className="text-sm font-semibold text-foreground">{post.views ?? 0}</p>
+                    <p className="text-sm font-semibold text-foreground">{liveViews}</p>
                   </div>
                   <div className="rounded-xl border border-border/50 bg-background/40 px-3 py-2">
                     <p className="text-[11px] text-text-subtle">

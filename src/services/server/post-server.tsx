@@ -387,3 +387,40 @@ export async function getPostById(id: string): Promise<PostWithEngagement | null
     user_has_bookmarked: userHasBookmarked,
   };
 }
+
+/**
+ * Post görüntülenme sayısını 1 artırır ve yeni değeri döner.
+ * Not: Basit yaklaşım için read+update kullanır.
+ */
+export async function incrementPostViews(postId: string): Promise<number | null> {
+  const supabase = await createServerClient();
+
+  const { data: currentRow, error: readError } = await supabase
+    .from("posts")
+    .select("views")
+    .eq("id", postId)
+    .maybeSingle();
+
+  if (readError || !currentRow) {
+    console.error("incrementPostViews: read failed", readError?.message);
+    return null;
+  }
+
+  const current = (currentRow as { views: number | null }).views ?? 0;
+  const next = current + 1;
+
+  const { data: updated, error: updateError } = await supabase
+    .from("posts")
+    .update({ views: next })
+    .eq("id", postId)
+    .select("views")
+    .maybeSingle();
+
+  if (updateError) {
+    console.error("incrementPostViews: update failed", updateError.message);
+    return null;
+  }
+
+  const updatedViews = (updated as { views: number | null } | null)?.views;
+  return updatedViews ?? next;
+}
