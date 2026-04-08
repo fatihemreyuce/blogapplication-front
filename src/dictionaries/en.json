@@ -29,6 +29,25 @@
     "empty": "No tags yet.",
     "view_posts": "View all"
   },
+  "series_home": {
+    "title": "Series",
+    "subtitle": "Explore step-by-step series to learn in a structured flow.",
+    "empty": "No series yet.",
+    "view_posts": "View posts"
+  },
+  "series_detail": {
+    "back": "Back to Series",
+    "description": "Description",
+    "base_info": "Base Info",
+    "title": "Title",
+    "slug": "Slug",
+    "author_id": "Author ID",
+    "created_at": "Created At",
+    "cover_image": "Cover Image",
+    "open_cover": "Open image",
+    "no_cover": "No cover image.",
+    "view_posts": "View posts in this series"
+  },
   "blog": {
     "title": "Blog",
     "subtitle": "All posts",

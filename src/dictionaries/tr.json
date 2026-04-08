@@ -29,6 +29,25 @@
     "empty": "Henüz etiket yok.",
     "view_posts": "Tümü"
   },
+  "series_home": {
+    "title": "Seriler",
+    "subtitle": "Adım adım öğrenmek için seri içerikleri keşfet.",
+    "empty": "Henüz seri yok.",
+    "view_posts": "Yazıları gör"
+  },
+  "series_detail": {
+    "back": "Serilere Dön",
+    "description": "Açıklama",
+    "base_info": "Temel Bilgiler",
+    "title": "Başlık",
+    "slug": "Slug",
+    "author_id": "Yazar ID",
+    "created_at": "Oluşturma Tarihi",
+    "cover_image": "Kapak Görseli",
+    "open_cover": "Görseli aç",
+    "no_cover": "Kapak görseli yok.",
+    "view_posts": "Bu serinin yazılarını gör"
+  },
   "blog": {
     "title": "Blog",
     "subtitle": "Tüm yazılar",

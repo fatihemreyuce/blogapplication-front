@@ -4,6 +4,7 @@ import { hasLocale, getDictionary } from "./dictionaries";
 import { Hero } from "@/components/sections/hero";
 import { HomeCategoriesStrip } from "@/components/sections/home-categories-strip";
 import { HomeTagsStrip } from "@/components/sections/home-tags-strip";
+import { HomeSeriesStrip } from "@/components/sections/home-series-strip";
 import { PostsGrid3D } from "@/components/blog/posts-grid-3d";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,15 +16,17 @@ import { ShimmerButton } from "@/components/magicui/shimmer-button";
 import { Spotlight } from "@/components/magicui/spotlight";
 import { getBlogTaxonomy, getPublishedPosts } from "@/services/server/post-server";
 import { getCategories } from "@/services/server/category-server";
+import { getSeriesList } from "@/services/server/series-server";
 
 export default async function HomePage({ params }: PageProps<"/[lang]">) {
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
   const dict = await getDictionary(lang);
-  const [posts, categories, taxonomy] = await Promise.all([
+  const [posts, categories, taxonomy, series] = await Promise.all([
     getPublishedPosts(3, lang),
     getCategories(),
     getBlogTaxonomy(),
+    getSeriesList(),
   ]);
 
   return (
@@ -31,6 +34,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
       <Hero lang={lang} />
       <HomeCategoriesStrip lang={lang} categories={categories} dict={dict.categories} />
       <HomeTagsStrip lang={lang} tags={taxonomy.tags} dict={dict.tags_home} />
+      <HomeSeriesStrip lang={lang} series={series} dict={dict.series_home} />
       <section className="relative py-14 md:py-18">
         <div className="pointer-events-none absolute -top-16 right-0 h-80 w-80 rounded-full bg-violet-500/10 blur-3xl" />
         <div className="pointer-events-none absolute bottom-0 left-0 h-72 w-72 rounded-full bg-blue-500/10 blur-3xl" />

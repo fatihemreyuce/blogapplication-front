@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { hasLocale } from "@/app/[lang]/dictionaries";
-import { TaxonomyHub } from "@/components/taxonomy/taxonomy-hub";
-import { getBlogTaxonomy } from "@/services/server/post-server";
+import { hasLocale, getDictionary } from "@/app/[lang]/dictionaries";
+import { SeriesShowcase } from "@/components/series/series-showcase";
+import { getSeriesList } from "@/services/server/series-server";
 
 export async function generateMetadata({
   params,
@@ -19,21 +19,13 @@ export default async function SeriesPage({ params }: PageProps<"/[lang]/seriler"
   const { lang } = await params;
   if (!hasLocale(lang)) notFound();
 
-  const { series } = await getBlogTaxonomy();
+  const [dict, series] = await Promise.all([getDictionary(lang), getSeriesList()]);
 
   return (
-    <TaxonomyHub
+    <SeriesShowcase
       lang={lang}
-      title={lang === "tr" ? "Seriler" : "Series"}
-      subtitle={
-        lang === "tr"
-          ? "Seri bazında ilerle, bir konuyu adım adım takip et."
-          : "Learn step by step with curated post series."
-      }
-      emptyLabel={lang === "tr" ? "Henüz seri yok." : "No series yet."}
-      items={series}
-      queryKey="seriesId"
-      prefix=""
+      series={series}
+      dict={dict.series_home}
     />
   );
 }
